@@ -1,0 +1,20 @@
+from .base import StageInfo
+from .stage00 import STAGE_INFO as stage00_info
+from .stage01 import STAGE_INFO as stage01_info
+from .stage02 import STAGE_INFO as stage02_info
+from .stage03 import STAGE_INFO as stage03_info
+from .stage04 import STAGE_INFO as stage04_info
+from .stage05 import STAGE_INFO as stage05_info
+from .stage06 import STAGE_INFO as stage06_info
+
+STAGES = {
+    stage00_info.stage_id: stage00_info,
+    stage01_info.stage_id: stage01_info,
+    stage02_info.stage_id: stage02_info,
+    stage03_info.stage_id: stage03_info,
+    stage04_info.stage_id: stage04_info,
+    stage05_info.stage_id: stage05_info,
+    stage06_info.stage_id: stage06_info,
+}
+
+__all__ = ["StageInfo", "STAGES"]
