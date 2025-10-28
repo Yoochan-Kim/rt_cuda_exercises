@@ -9,14 +9,16 @@ CUDA_SOURCES := gpu_skeleton.cu \
                 grid_block_2d.cu \
                 shared_tile_example.cu
 
-BINARIES := $(CUDA_SOURCES:.cu=)
+BIN_DIR := bin
+BINARIES := $(addprefix $(BIN_DIR)/, $(CUDA_SOURCES:.cu=))
 
 .PHONY: all clean
 
 all: $(BINARIES)
 
-%: %.cu
+$(BIN_DIR)/%: %.cu
+	@mkdir -p $(dir $@)
 	$(NVCC) $(NVCCFLAGS) $< -o $@
 
 clean:
-	rm -f $(BINARIES)
+	rm -rf $(BIN_DIR)
