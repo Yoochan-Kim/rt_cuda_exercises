@@ -39,28 +39,36 @@ cuda_study/
 
 ### Basic Verification
 
-Verify all exercises:
+`run.py` requires a `--round` argument. Currently only round 1 is implemented and covers stages 00 through 06.
+
+Verify all exercises in round 1:
 
 ```bash
-python run.py
+python run.py --round 1
+```
+
+List available stages for round 1:
+
+```bash
+python run.py --round 1 --list
 ```
 
 Verify a specific stage:
 
 ```bash
-python run.py --stage 00
+python run.py --round 1 --stage 00
 ```
 
 Verify answer implementation:
 
 ```bash
-python run.py --answer --stage 01
+python run.py --round 1 --answer --stage 01
 ```
 
 Show verbose output (GPU stream output):
 
 ```bash
-python run.py --verbose
+python run.py --round 1 --verbose
 ```
 
 ### SKIP_CPU Mode
@@ -75,7 +83,7 @@ For stages with CPU validation (stage 02-06), you can skip CPU computation and d
 
 2. **Run verification in SKIP_CPU mode**:
    ```bash
-   python run.py --answer --skip_cpu
+   python run.py --round 1 --answer --skip_cpu
    ```
 
 **Note**:
@@ -83,6 +91,8 @@ For stages with CPU validation (stage 02-06), you can skip CPU computation and d
 - Golden references are generated using numpy and stored as pickled Python lists
 
 ### Learning Path
+
+#### Round 1
 
 1. **Stage 00**: Hello World - Basic CUDA kernel launch
 2. **Stage 01**: Vector Addition - 1D thread indexing
@@ -96,9 +106,9 @@ For stages with CPU validation (stage 02-06), you can skip CPU computation and d
 
 1. Read the document in `docs/stageXX.md` and TODO comments in `exercises/stageXX/todo.cu`
 2. Implement the required functionality
-3. Run `python run.py` (automatically builds and verifies all stages)
-   - Optional: `python run.py --stage XX` to verify a specific stage
-   - Optional: `python run.py --answer --stage XX` to verify answer implementation
+3. Run `python run.py --round 1` (automatically builds and verifies all round-1 stages)
+   - Optional: `python run.py --round 1 --stage XX` to verify a specific stage
+   - Optional: `python run.py --round 1 --answer --stage XX` to verify answer implementation
 4. Compare with reference implementation in `answers/stageXX/todo.cu` if needed
 
 ## Notes

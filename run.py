@@ -3,12 +3,18 @@
 import argparse
 import sys
 
-from tools.verify_stage import known_stages, verify_stages, verify_answers
+from tools.verify_stage import verify_stages, verify_answers
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="CUDA learning stage build and verification tool",
+    )
+    parser.add_argument(
+        "--round",
+        type=int,
+        required=True,
+        help="Round number to execute. Round 1 runs stages 00 through 06.",
     )
     parser.add_argument(
         "--stage",
@@ -41,11 +47,23 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    if args.list:
-        print("Available stages:", " ".join(known_stages()))
+    if args.round != 1:
+        print("not ready")
         return 0
 
-    targets = [args.stage] if args.stage else None
+    round_stages = [f"{i:02d}" for i in range(7)]
+
+    if args.list:
+        print("Available stages:", " ".join(round_stages))
+        return 0
+
+    if args.stage:
+        if args.stage not in round_stages:
+            print(f"Stage {args.stage} is not part of round {args.round}.")
+            return 1
+        targets = [args.stage]
+    else:
+        targets = round_stages
 
     if args.answer:
         success = verify_answers(targets, skip_cpu=args.skip_cpu, verbose=args.verbose)
@@ -57,4 +75,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
