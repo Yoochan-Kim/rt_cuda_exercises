@@ -128,11 +128,12 @@ def _verify_target(stage: StageInfo, target: str, skip_cpu: bool = False, verbos
                 mismatches.append((i, gpu_val, ref_val, diff))
 
         if len(mismatches) == 0:
+            print(f"[Stage {stage.stage_id}] ✅ {label} passed (GPU output matches reference)")
             if verbose:
-                print(f"[Stage {stage.stage_id}] ✅ {label} passed (GPU output matches reference)")
-                print(run_result.stdout.rstrip())
-            else:
-                print(f"[Stage {stage.stage_id}] ✅ {label} passed (GPU output matches reference)")
+                if run_result.stdout:
+                    print(run_result.stdout.rstrip())
+                if run_result.stderr:
+                    print(run_result.stderr.rstrip())
             return True
 
         # Show mismatches
@@ -145,8 +146,10 @@ def _verify_target(stage: StageInfo, target: str, skip_cpu: bool = False, verbos
             print(f"    [{i}] GPU={gpu_val:.6f}, Ref={ref_val:.6f}, Diff={diff:.6e}")
 
         if verbose:
-            print("\n---- Full GPU output ----")
-            print(run_result.stdout.rstrip())
+            if run_result.stdout:
+                print(run_result.stdout.rstrip())
+            if run_result.stderr:
+                print(run_result.stderr.rstrip())
 
         return False
     else:
@@ -155,11 +158,12 @@ def _verify_target(stage: StageInfo, target: str, skip_cpu: bool = False, verbos
         norm_expected = stage.normalizer(stage.expected_output)
 
         if norm_output == norm_expected:
+            print(f"[Stage {stage.stage_id}] ✅ {label} passed")
             if verbose:
-                print(f"[Stage {stage.stage_id}] ✅ {label} passed")
-                print(run_result.stdout.rstrip())
-            else:
-                print(f"[Stage {stage.stage_id}] ✅ {label} passed")
+                if run_result.stdout:
+                    print(run_result.stdout.rstrip())
+                if run_result.stderr:
+                    print(run_result.stderr.rstrip())
             return True
 
         print(f"[Stage {stage.stage_id}] ❌ {label} output mismatch")
@@ -180,8 +184,10 @@ def _verify_target(stage: StageInfo, target: str, skip_cpu: bool = False, verbos
             print(line)
 
         if verbose:
-            print("\n---- Full output ----")
-            print(run_result.stdout.rstrip())
+            if run_result.stdout:
+                print(run_result.stdout.rstrip())
+            if run_result.stderr:
+                print(run_result.stderr.rstrip())
 
         return False
 
@@ -238,4 +244,3 @@ def verify_answers(stage_ids: Optional[Iterable[str]] = None, skip_cpu: bool = F
 
 def known_stages() -> List[str]:
     return sorted(STAGES.keys())
-

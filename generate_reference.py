@@ -16,6 +16,44 @@ ROOT = Path(__file__).resolve().parent
 REFERENCE_DIR = ROOT / "references"
 
 
+def _mt19937_uint32(seed: int, size: int) -> np.ndarray:
+    """Replicates std::mt19937 sequence producing 32-bit outputs."""
+    N = 624
+    M = 397
+    MATRIX_A = 0x9908B0DF
+    UPPER_MASK = 0x80000000
+    LOWER_MASK = 0x7FFFFFFF
+
+    state = [0] * N
+    state[0] = seed & 0xFFFFFFFF
+    for i in range(1, N):
+        state[i] = (1812433253 * (state[i - 1] ^ (state[i - 1] >> 30)) + i) & 0xFFFFFFFF
+
+    index = N
+    result = np.empty(size, dtype=np.uint32)
+
+    for j in range(size):
+        if index >= N:
+            for i in range(N):
+                y = (state[i] & UPPER_MASK) + (state[(i + 1) % N] & LOWER_MASK)
+                state[i] = state[(i + M) % N] ^ (y >> 1)
+                if y & 0x1:
+                    state[i] ^= MATRIX_A
+            index = 0
+
+        y = state[index]
+        index += 1
+
+        y ^= (y >> 11)
+        y ^= (y << 7) & 0x9D2C5680
+        y ^= (y << 15) & 0xEFC60000
+        y ^= (y >> 18)
+
+        result[j] = y & 0xFFFFFFFF
+
+    return result
+
+
 def generate_stage02_reference() -> np.ndarray:
     """Stage 2: Vector addition."""
     k_blocks = 8
@@ -85,12 +123,24 @@ def generate_stage06_reference() -> np.ndarray:
     return generate_stage05_reference()
 
 
+def generate_stage07_reference() -> np.ndarray:
+    """Stage 7: Shared memory reduction baseline."""
+    k_element_count = 1 << 24
+    seed = 12345
+    raw = _mt19937_uint32(seed, k_element_count)
+    inv_max = 1.0 / np.float32(np.iinfo(np.uint32).max)
+    values = raw.astype(np.float32) * inv_max * 2.0 - 1.0
+    reference_sum = float(values.astype(np.float64).sum())
+    return np.array([reference_sum], dtype=np.float32)
+
+
 STAGE_GENERATORS = {
     "02": generate_stage02_reference,
     "03": generate_stage03_reference,
     "04": generate_stage04_reference,
     "05": generate_stage05_reference,
     "06": generate_stage06_reference,
+    "07": generate_stage07_reference,
 }
 
 
