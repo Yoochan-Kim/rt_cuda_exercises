@@ -15,6 +15,7 @@
 
 constexpr std::size_t kElementCount = 1 << 24;
 constexpr float kRelativeTolerance = 1e-5f;
+constexpr int kGpuRuns = 100;
 
 #ifndef SKIP_CPU
 double reduceOnHost(const std::vector<float>& values) {
@@ -53,20 +54,37 @@ int runReductionDemo() {
     CHECK_CUDA(cudaEventCreate(&start));
     CHECK_CUDA(cudaEventCreate(&stop));
 
-    CHECK_CUDA(cudaEventRecord(start));
-    CHECK_CUDA(reduceSharedMemoryBaseline(hostInput.data(), hostInput.size(), &gpuSum));
-    CHECK_CUDA(cudaEventRecord(stop));
-    CHECK_CUDA(cudaEventSynchronize(stop));
+    double gpuTimeTotal = 0.0;
+    double gpuTimeMin = std::numeric_limits<double>::infinity();
+    double gpuTimeMax = 0.0;
 
-    float gpuTime = 0.0f;
-    CHECK_CUDA(cudaEventElapsedTime(&gpuTime, start, stop));
+    for (int run = 0; run < kGpuRuns; ++run) {
+        CHECK_CUDA(cudaEventRecord(start));
+        CHECK_CUDA(reduceSharedMemoryBaseline(hostInput.data(), hostInput.size(), &gpuSum));
+        CHECK_CUDA(cudaEventRecord(stop));
+        CHECK_CUDA(cudaEventSynchronize(stop));
+
+        float runTimeMs = 0.0f;
+        CHECK_CUDA(cudaEventElapsedTime(&runTimeMs, start, stop));
+
+        gpuTimeTotal += static_cast<double>(runTimeMs);
+        if (runTimeMs < gpuTimeMin) {
+            gpuTimeMin = static_cast<double>(runTimeMs);
+        }
+        if (runTimeMs > gpuTimeMax) {
+            gpuTimeMax = static_cast<double>(runTimeMs);
+        }
+    }
+
+    const double gpuTimeAvg = gpuTimeTotal / static_cast<double>(kGpuRuns);
 
     CHECK_CUDA(cudaEventDestroy(start));
     CHECK_CUDA(cudaEventDestroy(stop));
 
 #ifdef SKIP_CPU
     std::cout << gpuSum << std::endl;
-    std::cerr << "GPU time : " << gpuTime << " ms" << std::endl;
+    std::cerr << "GPU time (avg over " << kGpuRuns << " runs) : " << gpuTimeAvg << " ms" << std::endl;
+    std::cerr << "GPU time (min / max) : " << gpuTimeMin << " ms / " << gpuTimeMax << " ms" << std::endl;
 #else
     const double gpuSumAsDouble = static_cast<double>(gpuSum);
     const double denom = (std::abs(cpuSum) > 1e-12) ? std::abs(cpuSum) : 1e-12;
@@ -85,7 +103,8 @@ int runReductionDemo() {
 
     std::cout << "\nTiming:" << std::endl;
     std::cout << "  CPU time : " << cpuTime << " ms" << std::endl;
-    std::cout << "  GPU time : " << gpuTime << " ms" << std::endl;
+    std::cout << "  GPU time (avg over " << kGpuRuns << " runs) : " << gpuTimeAvg << " ms" << std::endl;
+    std::cout << "  GPU time (min / max) : " << gpuTimeMin << " ms / " << gpuTimeMax << " ms" << std::endl;
 #endif
 
     return 0;

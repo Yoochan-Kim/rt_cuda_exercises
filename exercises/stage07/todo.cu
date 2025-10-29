@@ -8,7 +8,7 @@
 
 #include "cuda_utils.cuh"
 
-constexpr int kThreadsPerBlock = 256;
+constexpr int kThreadsPerBlock = 128;
 
 /* TODO:
  * Implement the shared memory reduction (reduce0) using interleaved addressing.

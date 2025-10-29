@@ -79,10 +79,11 @@ def _verify_target(stage: StageInfo, target: str, skip_cpu: bool = False, verbos
     skip_cpu_actual = skip_cpu and stage.stage_id not in ["00", "01"]
 
     if skip_cpu_actual:
-        reference_file = REFERENCE_DIR / f"stage{stage.stage_id}_skip_cpu.pkl"
+        reference_stage_id = stage.skip_cpu_reference_stage_id or stage.stage_id
+        reference_file = REFERENCE_DIR / f"stage{reference_stage_id}_skip_cpu.pkl"
         if not reference_file.exists():
             print(f"[Stage {stage.stage_id}] ❌ Reference file not found: {reference_file}")
-            print(f"Run 'python generate_reference.py --stage {stage.stage_id}' to generate it first")
+            print(f"Run 'python generate_reference.py --stage {reference_stage_id}' to generate it first")
             return False
 
     if not _build_target(stage, target, skip_cpu_actual):
@@ -101,7 +102,8 @@ def _verify_target(stage: StageInfo, target: str, skip_cpu: bool = False, verbos
 
     if skip_cpu_actual:
         # In skip_cpu mode, load reference from pickle file (already checked existence above)
-        reference_file = REFERENCE_DIR / f"stage{stage.stage_id}_skip_cpu.pkl"
+        reference_stage_id = stage.skip_cpu_reference_stage_id or stage.stage_id
+        reference_file = REFERENCE_DIR / f"stage{reference_stage_id}_skip_cpu.pkl"
 
         with open(reference_file, "rb") as f:
             reference_list = pickle.load(f)

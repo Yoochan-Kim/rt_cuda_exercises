@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 
 
 Normalizer = Callable[[str], str]
@@ -15,4 +15,4 @@ class StageInfo:
     answer_src: Path
     normalizer: Normalizer
     expected_output: str
-
+    skip_cpu_reference_stage_id: Optional[str] = None

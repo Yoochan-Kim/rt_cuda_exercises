@@ -1,5 +1,5 @@
-// Stage 7: Shared Memory Reduction Baseline
-// Baseline implementation that loads into shared memory before performing interleaved-addressing reduction.
+// Stage 8: Strided Index Interleaved Reduction
+// Builds on the shared memory baseline by removing the modulo condition with a strided index pattern.
 
 #include <chrono>
 #include <cmath>
@@ -60,7 +60,7 @@ int runReductionDemo() {
 
     for (int run = 0; run < kGpuRuns; ++run) {
         CHECK_CUDA(cudaEventRecord(start));
-        CHECK_CUDA(reduceSharedMemoryBaseline(hostInput.data(), hostInput.size(), &gpuSum));
+        CHECK_CUDA(reduceSharedMemoryStridedIndex(hostInput.data(), hostInput.size(), &gpuSum));
         CHECK_CUDA(cudaEventRecord(stop));
         CHECK_CUDA(cudaEventSynchronize(stop));
 
@@ -91,9 +91,9 @@ int runReductionDemo() {
     const double relativeError = std::abs(cpuSum - gpuSumAsDouble) / denom;
 
     if (relativeError <= kRelativeTolerance) {
-        std::cout << "Stage 7 reduction matches reference ✅" << std::endl;
+        std::cout << "Stage 8 reduction matches reference ✅" << std::endl;
     } else {
-        std::cout << "Stage 7 reduction mismatch ❌" << std::endl;
+        std::cout << "Stage 8 reduction mismatch ❌" << std::endl;
     }
 
     std::cout << "\nInput size: " << hostInput.size() << " elements" << std::endl;

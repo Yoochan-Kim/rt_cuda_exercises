@@ -1,5 +1,5 @@
-// Stage 7: Shared Memory Reduction Baseline
-// Implements the PDF's reduce0 kernel using shared memory and interleaved addressing.
+// Stage 8: Strided Index Interleaved Reduction
+// Implements the PDF's reduce1 kernel, removing the modulo branch by using a strided index.
 
 #include <cuda_runtime.h>
 
@@ -11,11 +11,11 @@
 constexpr int kThreadsPerBlock = 128;
 
 /* TODO:
- * Implement the shared memory reduction (reduce0) using interleaved addressing.
+ * Implement the shared memory reduction (reduce1) using a strided index instead of modulo.
  * Steps:
  *   1) Declare a shared memory buffer sized to blockDim.x (use extern __shared__).
  *   2) Load one element per thread from global memory if the global index is in range, otherwise store 0.
- *   3) For stride = 1, 2, 4, ... let only threads where threadIdx.x % (2 * stride) == 0 add their neighbor.
+ *   3) For stride = 1, 2, 4, ... compute index = 2 * stride * threadIdx.x and accumulate sdata[index + stride].
  *   4) After the loop, thread 0 writes the block's partial sum (sdata[0]) into g_odata[blockIdx.x].
  * Remember to keep __syncthreads() so that shared memory updates are visible before the next step.
  */
@@ -31,11 +31,9 @@ __global__ void reduceSharedMemoryKernel(const float* g_idata,
     __syncthreads();
 
     for (unsigned int stride = 1; stride < blockDim.x; stride *= 2) {
-        if ((tid % (stride * 2)) == 0) {
-            const unsigned int neighbor = tid + stride;
-            if (neighbor < blockDim.x) {
-                sdata[tid] += sdata[neighbor];
-            }
+        const unsigned int index = 2 * stride * tid;
+        if (index < blockDim.x) {
+            sdata[index] += sdata[index + stride];
         }
         __syncthreads();
     }
@@ -46,9 +44,9 @@ __global__ void reduceSharedMemoryKernel(const float* g_idata,
 }
 
 // Host helper that prepares device buffers and collects per-block partial sums.
-cudaError_t reduceSharedMemoryBaseline(const float* hostInput,
-                                       std::size_t count,
-                                       float* outSum) {
+cudaError_t reduceSharedMemoryStridedIndex(const float* hostInput,
+                                           std::size_t count,
+                                           float* outSum) {
     if (count == 0) {
         *outSum = 0.0f;
         return cudaSuccess;
@@ -80,7 +78,7 @@ cudaError_t reduceSharedMemoryBaseline(const float* hostInput,
 
     std::vector<float> blockSums(gridSize, 0.0f);
 
-    // Launch the shared memory baseline, synchronize, and copy the partial sums back into blockSums.
+    // Launch the strided index reduction, synchronize, and copy the partial sums back into blockSums.
     const std::size_t sharedMemBytes = threads * sizeof(float);
     reduceSharedMemoryKernel<<<gridSize, threads, sharedMemBytes>>>(
         deviceData, devicePartials, static_cast<unsigned int>(count));
@@ -105,9 +103,6 @@ cudaError_t reduceSharedMemoryBaseline(const float* hostInput,
     }
 
     double finalSum = 0.0;
-    /* TODO:
-     * Accumulate the partial sums using a double accumulator and store the final value in outSum.
-     */
     for (float partial : blockSums) {
         finalSum += static_cast<double>(partial);
     }

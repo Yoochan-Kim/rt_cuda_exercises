@@ -49,7 +49,7 @@ def main() -> int:
 
     round_stages_map = {
         1: [f"{i:02d}" for i in range(7)],  # 00-06
-        2: ["07"],
+        2: ["07", "08"],
     }
 
     round_stages = round_stages_map.get(args.round)
