@@ -1,5 +1,5 @@
 // Stage 8: Strided Index Interleaved Reduction
-// Implements the PDF's reduce1 kernel, removing the modulo branch by using a strided index.
+// Implements the strided index variant that removes the modulo branch.
 
 #include <cuda_runtime.h>
 
@@ -8,10 +8,10 @@
 
 #include "cuda_utils.cuh"
 
-constexpr int kThreadsPerBlock = 128;
+constexpr int kThreadsPerBlock = 1024;
 
 /* TODO:
- * Implement the shared memory reduction (reduce1) using a strided index instead of modulo.
+ * Implement the shared memory reduction using a strided index instead of modulo.
  * Steps:
  *   1) Declare a shared memory buffer sized to blockDim.x (use extern __shared__).
  *   2) Load one element per thread from global memory if the global index is in range, otherwise store 0.

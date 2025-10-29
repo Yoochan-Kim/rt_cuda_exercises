@@ -13,7 +13,7 @@ Stage 07은 reduction의 **가장 첫 번째 공유 메모리 버전**을 구현
 
 ## 공유 메모리 기반 나이브 reduction 커널
 
-NVIDIA PDF의 `reduce0` 예제처럼, 한 블록에 들어온 데이터를 먼저 공유 메모리로 적재한 뒤 interleaved addressing 패턴으로 합쳐 나갑니다. 전역 메모리를 여러 번 읽고 쓰지 않기 때문에 Stage 07이 기존 CPU 대비 GPU 성능을 확인하기 위한 기준점이 됩니다.
+한 블록에 들어온 데이터를 먼저 공유 메모리로 적재한 뒤 interleaved addressing 패턴으로 합쳐 나갑니다. 전역 메모리를 여러 번 읽고 쓰지 않기 때문에 Stage 07이 기존 CPU 대비 GPU 성능을 확인하기 위한 기준점이 됩니다.
 
 - `extern __shared__` 또는 `__shared__` 배열을 사용해 블록 크기만큼의 버퍼를 확보합니다.
 - 각 스레드는 `unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;` 위치에서 하나의 값을 읽어와 공유 메모리에 저장합니다. (입력 길이가 블록 크기의 배수라고 가정하므로, 범위를 벗어나는 스레드는 등장하지 않습니다.)

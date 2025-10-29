@@ -3,7 +3,7 @@
 ## 튜토리얼 목표
 
 - Stage 07에서 사용한 `tid % (2 * s) == 0` 조건이 만드는 워프 다이버전스와 `%` 연산 비용을 분석한다.
-- NVIDIA reduction 가이드의 `reduce1` 커널처럼 **strided index**를 사용해 활성 스레드를 정렬시키고, 모듈로 연산 없이 interleaved addressing을 수행한다.
+- **Strided index**를 사용해 활성 스레드를 정렬시키고, 모듈로 연산 없이 interleaved addressing을 수행한다.
 - 호스트 파이프라인은 동일하게 유지하면서 커널 내부 루프만 교체해도 결과가 동일한지 검증한다.
 
 ## 왜 `%` 기반 interleaved 루프가 문제인가?

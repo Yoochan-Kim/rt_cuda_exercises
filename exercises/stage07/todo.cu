@@ -1,5 +1,5 @@
 // Stage 7: Shared Memory Reduction Baseline
-// Implements the PDF's reduce0 kernel using shared memory and interleaved addressing.
+// Implements the shared memory baseline using interleaved addressing.
 
 #include <cuda_runtime.h>
 
@@ -8,10 +8,10 @@
 
 #include "cuda_utils.cuh"
 
-constexpr int kThreadsPerBlock = 128;
+constexpr int kThreadsPerBlock = 1024;
 
 /* TODO:
- * Implement the shared memory reduction (reduce0) using interleaved addressing.
+ * Implement the shared memory reduction using interleaved addressing.
  * Steps:
  *   1) Declare a shared memory buffer sized to blockDim.x (use extern __shared__).
  *   2) Load one element per thread from global memory if the global index is in range, otherwise store 0.

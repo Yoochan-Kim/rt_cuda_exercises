@@ -14,7 +14,7 @@ def parse_args() -> argparse.Namespace:
         "--round",
         type=int,
         required=True,
-        help="Round number to execute. Round 1 runs stages 00-06, Round 2 runs stage 07.",
+        help="Round number to execute. Round 1 runs stages 00-06, Round 2 runs stages 07-09.",
     )
     parser.add_argument(
         "--stage",
@@ -49,7 +49,7 @@ def main() -> int:
 
     round_stages_map = {
         1: [f"{i:02d}" for i in range(7)],  # 00-06
-        2: ["07", "08"],
+        2: ["07", "08", "09"],
     }
 
     round_stages = round_stages_map.get(args.round)
