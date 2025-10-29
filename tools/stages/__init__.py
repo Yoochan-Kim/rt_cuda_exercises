@@ -10,6 +10,7 @@ from .stage07 import STAGE_INFO as stage07_info
 from .stage08 import STAGE_INFO as stage08_info
 from .stage09 import STAGE_INFO as stage09_info
 from .stage10 import STAGE_INFO as stage10_info
+from .stage11 import STAGE_INFO as stage11_info
 
 STAGES = {
     stage00_info.stage_id: stage00_info,
@@ -23,6 +24,7 @@ STAGES = {
     stage08_info.stage_id: stage08_info,
     stage09_info.stage_id: stage09_info,
     stage10_info.stage_id: stage10_info,
+    stage11_info.stage_id: stage11_info,
 }
 
 __all__ = ["StageInfo", "STAGES"]
