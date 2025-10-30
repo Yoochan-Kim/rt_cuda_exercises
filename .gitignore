@@ -3,5 +3,6 @@
 CUDA C++ Programming Guide — CUDA C++ Programming Guide_files/
 CUDA C++ Programming Guide — CUDA C++ Programming Guide.html
 bin/
+examples/*/bin/
 *.pyc
 references/
