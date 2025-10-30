@@ -3,6 +3,7 @@
 import argparse
 import sys
 
+from tools.stages import STAGES
 from tools.verify_stage import verify_stages, verify_answers
 
 
@@ -14,7 +15,7 @@ def parse_args() -> argparse.Namespace:
         "--round",
         type=int,
         required=True,
-        help="Round number to execute. Round 1 runs stages 00 through 06.",
+        help="Round number to execute. Round 1 runs stages 00-06, Round 2 runs stages 07-08.",
     )
     parser.add_argument(
         "--stage",
@@ -47,11 +48,16 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    if args.round != 1:
-        print("not ready")
-        return 0
+    round_stages_map = {
+        1: [f"{i:02d}" for i in range(7)],  # 00-06
+        2: ["07", "08"],
+    }
 
-    round_stages = [f"{i:02d}" for i in range(7)]
+    round_stages = round_stages_map.get(args.round)
+    if round_stages is None:
+        print(f"Round {args.round} is not configured yet.")
+        return 1
+
 
     if args.list:
         print("Available stages:", " ".join(round_stages))
@@ -68,7 +74,26 @@ def main() -> int:
     if args.answer:
         success = verify_answers(targets, skip_cpu=args.skip_cpu, verbose=args.verbose)
     else:
-        success = verify_stages(targets, skip_cpu=args.skip_cpu, verbose=args.verbose)
+        available_targets = []
+        skipped_targets = []
+        for stage_id in targets:
+            stage_info = STAGES.get(stage_id)
+            if stage_info is None:
+                continue
+            if stage_info.exercise_src.exists():
+                available_targets.append(stage_id)
+            else:
+                skipped_targets.append(stage_id)
+
+        if skipped_targets:
+            skipped_list = ", ".join(skipped_targets)
+            print(f"Skipping exercise stages with no source available: {skipped_list}")
+
+        if not available_targets:
+            print("No exercise stages available to verify. Use --answer to check the reference solutions.")
+            return 1
+
+        success = verify_stages(available_targets, skip_cpu=args.skip_cpu, verbose=args.verbose)
 
     return 0 if success else 1
 
