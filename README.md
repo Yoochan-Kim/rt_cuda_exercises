@@ -17,7 +17,9 @@ cuda_study/
 │   ├── stage03/           # Matrix addition (single block)
 │   ├── stage04/           # Matrix addition (multiple blocks)
 │   ├── stage05/           # Matrix multiplication (naive)
-│   └── stage06/           # Matrix multiplication (shared memory)
+│   ├── stage06/           # Matrix multiplication (shared memory)
+│   ├── stage07/           # Warp divergence (divergent vs split kernels)
+│   └── stage08/           # Early-exit divergence (stream compaction)
 ├── answers/               # Complete reference implementations
 ├── tools/                 # Verification and build utilities
 │   └── stages/            # Stage configurations
@@ -39,7 +41,7 @@ cuda_study/
 
 ### Basic Verification
 
-`run.py` requires a `--round` argument. Currently only round 1 is implemented and covers stages 00 through 06.
+`run.py` requires a `--round` argument. Round 1 covers stages 00 through 06, and round 2 does stage 07 and 08.
 
 Verify all exercises in round 1:
 
@@ -101,6 +103,11 @@ For stages with CPU validation (stage 02-06), you can skip CPU computation and d
 5. **Stage 04**: Matrix Addition - Block-based 2D computation
 6. **Stage 05**: Matrix Multiplication - Naive implementation with global memory
 7. **Stage 06**: Matrix Multiplication - Shared memory tiling with __syncthreads()
+
+#### Round 2
+
+1. **Stage 07**: Warp Divergence - Measuring and optimizing branch divergence with split kernels
+2. **Stage 08**: Early-Exit Divergence - Stream compaction to eliminate early-exit inefficiency
 
 ## Development Workflow
 
